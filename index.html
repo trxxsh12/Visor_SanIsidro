@@ -1,114 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Visor San Isidro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Visor San Isidro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-        }
-        #map {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+  <style>
+    html, body { margin:0; padding:0; height:100%; }
+    #map { width:100%; height:100vh; }
+    .popup-img {
+      max-width:260px;
+      border-radius:8px;
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body>
+  <div id="map"></div>
 
-<div id="map"></div>
+  <script>
+    // Inicializar mapa
+    var map = L.map('map').setView([-12.09, -77.04], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-<script>
-// -------------------------
-//   CREAR EL MAPA
-// -------------------------
-var map = L.map('map').setView([-12.0995, -77.0340], 15);
+    // Diccionario con rutas reales de tus imágenes EN LA RAÍZ DEL REPOSITORIO
+    const imagenesParques = {
+      "EL OLIVAR": "Olivar.jpeg",
+      "LIMA GOLF CLUB": "Golf.jpeg",
+      "PARQUE ERNESTO ALAYZA": "Parque Ernesto Alayza.jpeg"
+    };
 
-// Capa base
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+    // Imagen por defecto si no coincide el nombre
+    const imagenDefault = "Olivar.jpeg";
 
-// -------------------------
-//   ESTILOS DE CAPAS
-// -------------------------
-
-// ÁREAS VERDES
-function styleAreas(feature) {
-    return {
+    // Estilos
+    function styleAreas(f) {
+      return {
         color: "#008000",
         weight: 1,
-        fillColor: "#00FF88",
+        fillColor: "#00ff88",
         fillOpacity: 0.5
-    };
-}
+      };
+    }
 
-// CALLES
-function styleCalles(feature) {
-    return {
+    function styleCalles(f) {
+      return {
         color: "#ff6600",
         weight: 2
-    };
-}
-
-// -------------------------
-//   CAPAS CON POPUPS
-// -------------------------
-
-var areasLayer = L.geoJSON(null, {
-    style: styleAreas,
-    onEachFeature: function(feature, layer) {
-        let popup = "<b>ÁREA VERDE</b><br>";
-        for (let key in feature.properties) {
-            popup += key + ": " + feature.properties[key] + "<br>";
-        }
-        layer.bindPopup(popup);
+      };
     }
-}).addTo(map);
 
-var callesLayer = L.geoJSON(null, {
-    style: styleCalles,
-    onEachFeature: function(feature, layer) {
-        let popup = "<b>CALLE</b><br>";
-        for (let key in feature.properties) {
-            popup += key + ": " + feature.properties[key] + "<br>";
-        }
-        layer.bindPopup(popup);
+    // Función para popup con imagen
+    function onEachArea(feature, layer) {
+      let props = feature.properties;
+      const nombreRaw = props.NOMBRE || props.name || props.NOM_CCPP || props.NOM_CCPP_;
+      const nombre = (nombreRaw || "Área Verde").toUpperCase();
+
+      // Buscar imagen
+      const imgUrl = imagenesParques[nombre] || imagenDefault;
+
+      // Construir contenido del popup
+      let html = `<h3>${nombre}</h3>`;
+      html += `<img src="${imgUrl}" class="popup-img">`;
+
+      html += `<table>`;
+      for (let key in props) {
+        html += `<tr><td><strong>${key}</strong>:</td><td>${props[key]}</td></tr>`;
+      }
+      html += `</table>`;
+
+      layer.bindPopup(html);
     }
-}).addTo(map);
 
-// -------------------------
-//   CARGAR ARCHIVOS GEOJSON
-// -------------------------
+    // Cargar áreas verdes
+    fetch("SaniAreasVerdes.geojson")
+      .then(r => r.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: styleAreas,
+          onEachFeature: onEachArea
+        }).addTo(map);
+      });
 
-fetch("SaniAreasVerdes.geojson")
-    .then(res => res.json())
-    .then(data => areasLayer.addData(data));
-
-fetch("SaniCalles.geojson")
-    .then(res => res.json())
-    .then(data => callesLayer.addData(data));
-
-// -------------------------
-//   CONTROL DE CAPAS
-// -------------------------
-var overlays = {
-    "ÁreasVerdes": areasLayer,
-    "Calles": callesLayer
-};
-
-L.control.layers(null, overlays).addTo(map);
-
-</script>
-
+    // Cargar calles
+    fetch("SaniCalles.geojson")
+      .then(r => r.json())
+      .then(data => {
+        L.geoJSON(data, {
+          style: styleCalles
+        }).addTo(map);
+      });
+  </script>
 </body>
 </html>
