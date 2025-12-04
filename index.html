@@ -26,14 +26,19 @@
   <div id="map"></div>
 
   <script>
-    // Inicializar mapa
+    // ==========================
+    //  INICIALIZAR MAPA
+    // ==========================
     var map = L.map('map').setView([-12.09, -77.04], 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Diccionario de imágenes por FID (tu tabla real)
+
+    // ==========================
+    //  IMÁGENES POR FID
+    // ==========================
     const imagenesParques = {
       93: "EL OLIVAR.jpeg",
       116: "EL OLIVAR.jpeg",
@@ -42,10 +47,12 @@
       146: "LIMA GOLF CLUB.jpeg"
     };
 
-    // Imagen por defecto
     const imagenDefault = "EL OLIVAR.jpeg";
 
-    // Estilos
+
+    // ==========================
+    //  ESTILO PARQUES
+    // ==========================
     function styleAreas(f) {
       return {
         color: "#008000",
@@ -55,24 +62,32 @@
       };
     }
 
+
+    // ==========================
+    //  ESTILO VÍAS (MEJORADO)
+    // ==========================
     function styleCalles(f) {
       return {
         color: "#ff6600",
-        weight: 2
+        weight: 4,
+        opacity: 1
       };
     }
 
-    // Función popup para áreas verdes (con imagen)
+
+    // ==========================
+    // POPUP ÁREAS VERDES
+    // ==========================
     function onEachArea(feature, layer) {
       let props = feature.properties;
 
-      // Obtener el FID real
+      // FID verdadero del parque
       const id = props.FID;
 
-      // Buscar imagen por FID
+      // Seleccionar imagen según el FID
       const imgUrl = imagenesParques[id] || imagenDefault;
 
-      // Nombre real del campo correcto ("Nombre")
+      // Nombre real del campo
       const nombre = props.Nombre || "Área Verde";
 
       // Popup
@@ -88,7 +103,10 @@
       layer.bindPopup(html);
     }
 
-    // Función popup para vías (SIN IMAGEN)
+
+    // ==========================
+    // POPUP VÍAS (SIN IMAGEN)
+    // ==========================
     function onEachCalle(feature, layer) {
       let props = feature.properties;
 
@@ -101,7 +119,10 @@
       layer.bindPopup(html);
     }
 
-    // Cargar áreas verdes
+
+    // ==========================
+    // CARGAR ÁREAS VERDES
+    // ==========================
     fetch("SaniAreasVerdes.geojson")
       .then(r => r.json())
       .then(data => {
@@ -111,15 +132,23 @@
         }).addTo(map);
       });
 
-    // Cargar calles
+
+    // ==========================
+    // CARGAR VÍAS (CON PANE)
+    // ==========================
+    map.createPane('viasPane');
+    map.getPane('viasPane').style.zIndex = 500;
+
     fetch("SaniCalles.geojson")
       .then(r => r.json())
       .then(data => {
         L.geoJSON(data, {
+          pane: "viasPane",
           style: styleCalles,
           onEachFeature: onEachCalle
         }).addTo(map);
       });
+
   </script>
 </body>
 </html>
