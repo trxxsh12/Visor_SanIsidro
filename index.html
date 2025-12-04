@@ -83,7 +83,7 @@ var callesLayer = L.geoJSON(null, {
 // ---- Cargar archivos GeoJSON desde GitHub ----
 
 // ÁREAS
-fetch("SaniAVGT.geojson")
+fetch("SaniAreas.geojson")
     .then(res => res.json())
     .then(data => {
         areasLayer.addData(data).addTo(map);
