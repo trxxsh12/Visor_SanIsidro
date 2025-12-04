@@ -1,52 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<title>Visor San Isidro</title>
+    <meta charset="UTF-8">
+    <title>Visor San Isidro</title>
 
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Leaflet Search -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <!-- PANEL LATERAL -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.css" />
+    <script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.js"></script>
 
-<!-- Panel lateral -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.min.css" />
-<script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
+    <!-- BUSCADOR -->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 
-<style>
-    #map {
-        width: 100%;
-        height: 100vh;
-    }
-
-    .legend {
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
-        line-height: 18px;
-        font-size: 14px;
-    }
-
-    .legend i {
-        width: 18px;
-        height: 18px;
-        float: left;
-        margin-right: 8px;
-        opacity: 0.8;
-    }
-</style>
+    <style>
+        body, html { margin: 0; height: 100%; }
+        #map { width: 100%; height: 100%; }
+    </style>
 </head>
 
 <body>
 
 <div id="sidebar" class="leaflet-sidebar collapsed">
     <div class="leaflet-sidebar-tabs">
-        <ul role="tablist">
-            <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-            <li><a href="#layers" role="tab"><i class="fa fa-layer-group"></i></a></li>
+        <ul>
+            <li><a href="#capas" role="tab"><i class="fa fa-layer-group"></i> Capas</a></li>
+            <li><a href="#leyenda" role="tab"><i class="fa fa-info"></i> Leyenda</a></li>
         </ul>
-        <ul role="tablist">
-            <
+    </div>
+
+    <div class="leaflet-sidebar-content">
+        <div class="leaflet-sidebar-pane" id="capas">
+            <h2>Capas</h2>
+            <input type="checkbox" id="areasCheck" checked> Áreas verdes<br>
+            <input type="checkbox" id="callesCheck" checked> Calles<br>
+        </div>
+
+        <div class="leaflet-sidebar-pane" id="leyenda">
+            <h2>Leyenda</h2>
+            <p><span style="background:#00ff88; padding:4px;">&nbsp;&nbsp;&nbsp;</span> Áreas verdes</p>
+            <p><span style="background:#ff6600; padding:4px;">&nbsp;&nbsp;&nbsp;</span> Calles</p>
+        </div>
+    </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+    var map = L.map('map').setView([-12.097, -77.034], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 20
+    }).addTo(map);
+
+    var sidebar = L.control.sidebar({ container: 'sidebar' }).addTo(map);
+
+    // --- ESTILOS ---
+    function styleAreas(feature) {
+        return { color: "#008000", fillColor: "#00ff88", fillOpacity: 0.5, weight: 1 };
+    }
+
+    function styleCalles(feature) {
+        return { color: "#ff6600", weight: 2 };
+    }
+
+    // --- CAPAS ---
+    var areasLayer = L.geoJSON(null, { style: styleAreas }).addTo(map);
+    var callesLayer = L.geoJSON(null, { style: styleCalles }).addTo(map);
+
+    // Cargar GeoJSON
+    fetch("SaniAreasVerdes.geojson")
+        .then(r => r.json())
+        .then(data => areasLayer.addData(data));
+
+    fetch("SaniCalles.geojson")
+        .then(r => r.json())
+        .then(data => callesLayer.addData(data));
+
+    // Control de capas
+    document.getElementById("areasCheck").onchange = function () {
+        if (this.checked) map.addLayer(areasLayer);
+        else map.removeLayer(areasLayer);
+    };
+
+    document.getElementById("callesCheck").onchange = function () {
+        if (this.checked) map.addLayer(callesLayer);
+        else map.removeLayer(callesLayer);
+    };
+
+    // BUSCADOR
+    L.Control.geocoder().addTo(map);
+</script>
+
+</body>
+</html>
