@@ -1,115 +1,114 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<title>Visor San Isidro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Visor San Isidro</title>
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<style>
-    html, body { height: 100%; margin: 0; }
-    #map { width: 100%; height: 100%; }
-</style>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; }
+        #map { width: 100%; height: 100%; }
+    </style>
 </head>
 
 <body>
+
 <div id="map"></div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// Crear mapa centrado en San Isidro
-var map = L.map('map').setView([-12.0995, -77.0340], 15);
+    // Crear el mapa
+    var map = L.map('map').setView([-12.09, -77.04], 15);
 
-// Capa base
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+    // Capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-// ---- Estilos ----
+    // ==== ESTILOS ====
 
-// ÁREAS VERDES (relleno)
-function styleAreas(feature) {
-    return {
-        color: "#008000",
-        weight: 1,
-        fillColor: "#00ff88",
-        fillOpacity: 0.5
-    };
-}
-
-// CALLES (líneas)
-function styleCalles(feature) {
-    return {
-        color: "#ff6600",
-        weight: 2
-    };
-}
-
-// ---- CAPAS ----
-
-// ÁREAS
-var areasLayer = L.geoJSON(null, {
-    style: styleAreas,
-    onEachFeature: function(feature, layer) {
-        var popupContent = "<b>Área</b><br>";
-        if (feature.properties) {
-            for (var key in feature.properties) {
-                popupContent += key + ": " + feature.properties[key] + "<br>";
-            }
-        }
-        layer.bindPopup(popupContent);
+    // Estilo para ÁREAS
+    function styleAreas(feature) {
+        return {
+            color: "#008000",
+            weight: 1,
+            fillColor: "#00ff88",
+            fillOpacity: 0.45
+        };
     }
-});
 
-// CALLES
-var callesLayer = L.geoJSON(null, {
-    style: styleCalles,
-    onEachFeature: function(feature, layer) {
-        var popupContent = "<b>Calle</b><br>";
-        if (feature.properties) {
-            for (var key in feature.properties) {
-                popupContent += key + ": " + feature.properties[key] + "<br>";
-            }
-        }
-        layer.bindPopup(popupContent);
+    // Estilo para CALLES
+    function styleCalles(feature) {
+        return {
+            color: "#0066ff",
+            weight: 2
+        };
     }
-});
 
-// ---- Cargar archivos GeoJSON desde GitHub ----
+    // ==== CREAR CAPAS VACÍAS ====
 
-// ÁREAS
-fetch("SaniAreas.geojson")
-    .then(res => res.json())
-    .then(data => {
-        areasLayer.addData(data).addTo(map);
+    // Capa de ÁREAS
+    var areasLayer = L.geoJSON(null, {
+        style: styleAreas,
+        onEachFeature: function (feature, layer) {
+            let popupContent = "<b>Área</b><br>";
+            
+            if (feature.properties) {
+                for (let key in feature.properties) {
+                    popupContent += key + ": " + feature.properties[key] + "<br>";
+                }
+            }
+            layer.bindPopup(popupContent);
+        }
     });
 
-// CALLES
-fetch("SaniCalles.geojson")
-    .then(res => res.json())
-    .then(data => {
-        callesLayer.addData(data);
+    // Capa de CALLES
+    var callesLayer = L.geoJSON(null, {
+        style: styleCalles,
+        onEachFeature: function (feature, layer) {
+            let popupContent = "<b>Calle</b><br>";
+            
+            if (feature.properties) {
+                for (let key in feature.properties) {
+                    popupContent += key + ": " + feature.properties[key] + "<br>";
+                }
+            }
+            layer.bindPopup(popupContent);
+        }
     });
 
-// ---- Control de Capas ----
-L.control.layers(
-    { "OpenStreetMap": map },  // Base layers
-    {
-        "Áreas Verdes": areasLayer,
+    // Agregar las capas al mapa
+    areasLayer.addTo(map);
+    callesLayer.addTo(map);
+
+    // ==== CARGAR GEOJSON DESDE GITHUB ====
+
+    // ÁREAS → archivo renombrado
+    fetch("SaniAreas.geojson")
+        .then(response => response.json())
+        .then(data => {
+            areasLayer.addData(data);
+        });
+
+    // CALLES → archivo renombrado
+    fetch("SaniCalles.geojson")
+        .then(response => response.json())
+        .then(data => {
+            callesLayer.addData(data);
+        });
+
+    // Control de capas
+    L.control.layers(null, {
+        "Áreas": areasLayer,
         "Calles": callesLayer
-    },
-    { collapsed: false }
-).addTo(map);
+    }).addTo(map);
 
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
