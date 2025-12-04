@@ -24,33 +24,21 @@
   <div id="map"></div>
 
   <script>
-    // ==========================
     // INICIALIZAR MAPA
-    // ==========================
     var map = L.map('map').setView([-12.09, -77.04], 15);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-
     // ==========================
-    // IMÁGENES (NOMBRES EXACTOS DE GITHUB)
+    // IMAGEN FIJA PARA TODOS LOS PARQUES
     // ==========================
-    const imagenesParques = {
-      93: "Olivar.jpeg",
-      116: "Olivar.jpeg",
-      117: "Olivar.jpeg",
-      47: "Parque Ernesto Alayza.jpeg",
-      146: "Golf.jpeg"
-    };
-
-    const imagenDefault = "Olivar.jpeg";
+    const imagenDefault = "Olivar.jpeg"; // ← Aquí puedes cambiarlo si quieres otra imagen
 
 
     // ==========================
-    // ESTILO ÁREAS VERDES
+    // ESTILO PARQUES
     // ==========================
     function styleAreas(f) {
       return {
@@ -62,7 +50,7 @@
     }
 
     // ==========================
-    // ESTILO VÍAS (MEJORADO)
+    // ESTILO VÍAS
     // ==========================
     function styleCalles(f) {
       return {
@@ -72,25 +60,18 @@
       };
     }
 
-
     // ==========================
-    // POPUP ÁREAS VERDES (CON IMAGEN)
+    // POPUP PARQUES (imagen fija)
     // ==========================
     function onEachArea(feature, layer) {
       let props = feature.properties;
 
-      // FID del parque
-      const id = props.FID;
-
-      // Imagen correspondiente
-      const imgUrl = imagenesParques[id] || imagenDefault;
-
-      // Nombre real del parque
+      // Nombre del parque
       const nombre = props.Nombre || "Área Verde";
 
-      // Crear HTML del popup
+      // Popup
       let html = `<h3>${nombre}</h3>`;
-      html += `<img src="${imgUrl}" class="popup-img">`;
+      html += `<img src="${imagenDefault}" class="popup-img">`;
 
       html += `<table>`;
       for (let key in props) {
@@ -103,7 +84,7 @@
 
 
     // ==========================
-    // POPUP VÍAS (SIN IMÁGENES)
+    // POPUP VÍAS (SIN IMAGEN)
     // ==========================
     function onEachCalle(feature, layer) {
       let props = feature.properties;
@@ -119,7 +100,7 @@
 
 
     // ==========================
-    // CARGAR ÁREAS VERDES
+    // CARGAR PARQUES
     // ==========================
     fetch("SaniAreasVerdes.geojson")
       .then(r => r.json())
@@ -132,7 +113,7 @@
 
 
     // ==========================
-    // CARGAR VÍAS (CÓDIGO MEJORADO)
+    // CARGAR VÍAS
     // ==========================
     map.createPane('viasPane');
     map.getPane('viasPane').style.zIndex = 500;
