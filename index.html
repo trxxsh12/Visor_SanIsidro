@@ -33,15 +33,17 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Diccionario con rutas reales de tus imágenes EN LA RAÍZ DEL REPOSITORIO
+    // Diccionario de imágenes por FID (tu tabla real)
     const imagenesParques = {
-      "EL OLIVAR": "EL OLIVAR.jpeg",
-      "LIMA GOLF CLUB": "LIMA GOLF CLUB.jpeg",
-      "PARQUE ERNESTO ALAYZA": "PARQUE ERNESTO ALAYZA.jpeg"
+      93: "EL OLIVAR.jpeg",
+      116: "EL OLIVAR.jpeg",
+      117: "EL OLIVAR.jpeg",
+      47: "PARQUE ERNESTO ALAYZA.jpeg",
+      146: "LIMA GOLF CLUB.jpeg"
     };
 
-    // Imagen por defecto si no coincide el nombre
-    const imagenDefault = "Olivar.jpeg";
+    // Imagen por defecto
+    const imagenDefault = "EL OLIVAR.jpeg";
 
     // Estilos
     function styleAreas(f) {
@@ -60,20 +62,37 @@
       };
     }
 
-    // Función para popup con imagen
+    // Función popup para áreas verdes (con imagen)
     function onEachArea(feature, layer) {
       let props = feature.properties;
-      const nombreRaw = props.NOMBRE || props.name || props.NOM_CCPP || props.NOM_CCPP_;
-      const nombre = (nombreRaw || "Área Verde").toUpperCase();
 
-      // Buscar imagen
-      const imgUrl = imagenesParques[nombre] || imagenDefault;
+      // Obtener el FID real
+      const id = props.FID;
 
-      // Construir contenido del popup
+      // Buscar imagen por FID
+      const imgUrl = imagenesParques[id] || imagenDefault;
+
+      // Nombre real del campo correcto ("Nombre")
+      const nombre = props.Nombre || "Área Verde";
+
+      // Popup
       let html = `<h3>${nombre}</h3>`;
       html += `<img src="${imgUrl}" class="popup-img">`;
 
       html += `<table>`;
+      for (let key in props) {
+        html += `<tr><td><strong>${key}</strong>:</td><td>${props[key]}</td></tr>`;
+      }
+      html += `</table>`;
+
+      layer.bindPopup(html);
+    }
+
+    // Función popup para vías (SIN IMAGEN)
+    function onEachCalle(feature, layer) {
+      let props = feature.properties;
+
+      let html = `<h3>Vía</h3><table>`;
       for (let key in props) {
         html += `<tr><td><strong>${key}</strong>:</td><td>${props[key]}</td></tr>`;
       }
@@ -97,7 +116,8 @@
       .then(r => r.json())
       .then(data => {
         L.geoJSON(data, {
-          style: styleCalles
+          style: styleCalles,
+          onEachFeature: onEachCalle
         }).addTo(map);
       });
   </script>
