@@ -6,10 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Leaflet CSS & JS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
@@ -23,13 +20,15 @@
   </style>
 </head>
 <body>
+
   <div id="map"></div>
 
   <script>
     // ==========================
-    //  INICIALIZAR MAPA
+    // INICIALIZAR MAPA
     // ==========================
     var map = L.map('map').setView([-12.09, -77.04], 15);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
@@ -37,21 +36,21 @@
 
 
     // ==========================
-    //  IMÁGENES POR FID
+    // IMÁGENES (NOMBRES EXACTOS DE GITHUB)
     // ==========================
     const imagenesParques = {
-      93: "EL OLIVAR.jpeg",
-      116: "EL OLIVAR.jpeg",
-      117: "EL OLIVAR.jpeg",
-      47: "PARQUE ERNESTO ALAYZA.jpeg",
-      146: "LIMA GOLF CLUB.jpeg"
+      93: "Olivar.jpeg",
+      116: "Olivar.jpeg",
+      117: "Olivar.jpeg",
+      47: "Parque Ernesto Alayza.jpeg",
+      146: "Golf.jpeg"
     };
 
-    const imagenDefault = "EL OLIVAR.jpeg";
+    const imagenDefault = "Olivar.jpeg";
 
 
     // ==========================
-    //  ESTILO PARQUES
+    // ESTILO ÁREAS VERDES
     // ==========================
     function styleAreas(f) {
       return {
@@ -62,9 +61,8 @@
       };
     }
 
-
     // ==========================
-    //  ESTILO VÍAS (MEJORADO)
+    // ESTILO VÍAS (MEJORADO)
     // ==========================
     function styleCalles(f) {
       return {
@@ -76,21 +74,21 @@
 
 
     // ==========================
-    // POPUP ÁREAS VERDES
+    // POPUP ÁREAS VERDES (CON IMAGEN)
     // ==========================
     function onEachArea(feature, layer) {
       let props = feature.properties;
 
-      // FID verdadero del parque
+      // FID del parque
       const id = props.FID;
 
-      // Seleccionar imagen según el FID
+      // Imagen correspondiente
       const imgUrl = imagenesParques[id] || imagenDefault;
 
-      // Nombre real del campo
+      // Nombre real del parque
       const nombre = props.Nombre || "Área Verde";
 
-      // Popup
+      // Crear HTML del popup
       let html = `<h3>${nombre}</h3>`;
       html += `<img src="${imgUrl}" class="popup-img">`;
 
@@ -105,7 +103,7 @@
 
 
     // ==========================
-    // POPUP VÍAS (SIN IMAGEN)
+    // POPUP VÍAS (SIN IMÁGENES)
     // ==========================
     function onEachCalle(feature, layer) {
       let props = feature.properties;
@@ -134,7 +132,7 @@
 
 
     // ==========================
-    // CARGAR VÍAS (CON PANE)
+    // CARGAR VÍAS (CÓDIGO MEJORADO)
     // ==========================
     map.createPane('viasPane');
     map.getPane('viasPane').style.zIndex = 500;
