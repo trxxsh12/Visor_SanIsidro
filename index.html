@@ -1,97 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Visor San Isidro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- PANEL LATERAL -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.css" />
-    <script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.js"></script>
-
-    <!-- BUSCADOR -->
-    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
     <style>
-        body, html { margin: 0; height: 100%; }
-        #map { width: 100%; height: 100%; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
     </style>
 </head>
-
 <body>
-
-<div id="sidebar" class="leaflet-sidebar collapsed">
-    <div class="leaflet-sidebar-tabs">
-        <ul>
-            <li><a href="#capas" role="tab"><i class="fa fa-layer-group"></i> Capas</a></li>
-            <li><a href="#leyenda" role="tab"><i class="fa fa-info"></i> Leyenda</a></li>
-        </ul>
-    </div>
-
-    <div class="leaflet-sidebar-content">
-        <div class="leaflet-sidebar-pane" id="capas">
-            <h2>Capas</h2>
-            <input type="checkbox" id="areasCheck" checked> Áreas verdes<br>
-            <input type="checkbox" id="callesCheck" checked> Calles<br>
-        </div>
-
-        <div class="leaflet-sidebar-pane" id="leyenda">
-            <h2>Leyenda</h2>
-            <p><span style="background:#00ff88; padding:4px;">&nbsp;&nbsp;&nbsp;</span> Áreas verdes</p>
-            <p><span style="background:#ff6600; padding:4px;">&nbsp;&nbsp;&nbsp;</span> Calles</p>
-        </div>
-    </div>
-</div>
 
 <div id="map"></div>
 
 <script>
-    var map = L.map('map').setView([-12.097, -77.034], 15);
+// -------------------------
+//   CREAR EL MAPA
+// -------------------------
+var map = L.map('map').setView([-12.0995, -77.0340], 15);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 20
-    }).addTo(map);
+// Capa base
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-    var sidebar = L.control.sidebar({ container: 'sidebar' }).addTo(map);
+// -------------------------
+//   ESTILOS DE CAPAS
+// -------------------------
 
-    // --- ESTILOS ---
-    function styleAreas(feature) {
-        return { color: "#008000", fillColor: "#00ff88", fillOpacity: 0.5, weight: 1 };
-    }
-
-    function styleCalles(feature) {
-        return { color: "#ff6600", weight: 2 };
-    }
-
-    // --- CAPAS ---
-    var areasLayer = L.geoJSON(null, { style: styleAreas }).addTo(map);
-    var callesLayer = L.geoJSON(null, { style: styleCalles }).addTo(map);
-
-    // Cargar GeoJSON
-    fetch("SaniAreasVerdes.geojson")
-        .then(r => r.json())
-        .then(data => areasLayer.addData(data));
-
-    fetch("SaniCalles.geojson")
-        .then(r => r.json())
-        .then(data => callesLayer.addData(data));
-
-    // Control de capas
-    document.getElementById("areasCheck").onchange = function () {
-        if (this.checked) map.addLayer(areasLayer);
-        else map.removeLayer(areasLayer);
+// ÁREAS VERDES
+function styleAreas(feature) {
+    return {
+        color: "#008000",
+        weight: 1,
+        fillColor: "#00FF88",
+        fillOpacity: 0.5
     };
+}
 
-    document.getElementById("callesCheck").onchange = function () {
-        if (this.checked) map.addLayer(callesLayer);
-        else map.removeLayer(callesLayer);
+// CALLES
+function styleCalles(feature) {
+    return {
+        color: "#ff6600",
+        weight: 2
     };
+}
 
-    // BUSCADOR
-    L.Control.geocoder().addTo(map);
+// -------------------------
+//   CAPAS CON POPUPS
+// -------------------------
+
+var areasLayer = L.geoJSON(null, {
+    style: styleAreas,
+    onEachFeature: function(feature, layer) {
+        let popup = "<b>ÁREA VERDE</b><br>";
+        for (let key in feature.properties) {
+            popup += key + ": " + feature.properties[key] + "<br>";
+        }
+        layer.bindPopup(popup);
+    }
+}).addTo(map);
+
+var callesLayer = L.geoJSON(null, {
+    style: styleCalles,
+    onEachFeature: function(feature, layer) {
+        let popup = "<b>CALLE</b><br>";
+        for (let key in feature.properties) {
+            popup += key + ": " + feature.properties[key] + "<br>";
+        }
+        layer.bindPopup(popup);
+    }
+}).addTo(map);
+
+// -------------------------
+//   CARGAR ARCHIVOS GEOJSON
+// -------------------------
+
+fetch("SaniAreasVerdes.geojson")
+    .then(res => res.json())
+    .then(data => areasLayer.addData(data));
+
+fetch("SaniCalles.geojson")
+    .then(res => res.json())
+    .then(data => callesLayer.addData(data));
+
+// -------------------------
+//   CONTROL DE CAPAS
+// -------------------------
+var overlays = {
+    "Áreas Verdes": areasLayer,
+    "Calles": callesLayer
+};
+
+L.control.layers(null, overlays).addTo(map);
+
 </script>
 
 </body>
