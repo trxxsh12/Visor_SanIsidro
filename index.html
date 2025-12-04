@@ -1,114 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Visor San Isidro</title>
+<meta charset="UTF-8" />
+<title>Visor San Isidro</title>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; }
-        #map { width: 100%; height: 100%; }
-    </style>
+<!-- Leaflet Search -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<!-- Panel lateral -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2/css/leaflet-sidebar.min.css" />
+<script src="https://unpkg.com/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
+
+<style>
+    #map {
+        width: 100%;
+        height: 100vh;
+    }
+
+    .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        line-height: 18px;
+        font-size: 14px;
+    }
+
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.8;
+    }
+</style>
 </head>
 
 <body>
 
-<div id="map"></div>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-    // Crear el mapa
-    var map = L.map('map').setView([-12.09, -77.04], 15);
-
-    // Capa base
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // ==== ESTILOS ====
-
-    // Estilo para ÁREAS
-    function styleAreas(feature) {
-        return {
-            color: "#008000",
-            weight: 1,
-            fillColor: "#00ff88",
-            fillOpacity: 0.45
-        };
-    }
-
-    // Estilo para CALLES
-    function styleCalles(feature) {
-        return {
-            color: "#0066ff",
-            weight: 2
-        };
-    }
-
-    // ==== CREAR CAPAS VACÍAS ====
-
-    // Capa de ÁREAS
-    var areasLayer = L.geoJSON(null, {
-        style: styleAreas,
-        onEachFeature: function (feature, layer) {
-            let popupContent = "<b>Área</b><br>";
-            
-            if (feature.properties) {
-                for (let key in feature.properties) {
-                    popupContent += key + ": " + feature.properties[key] + "<br>";
-                }
-            }
-            layer.bindPopup(popupContent);
-        }
-    });
-
-    // Capa de CALLES
-    var callesLayer = L.geoJSON(null, {
-        style: styleCalles,
-        onEachFeature: function (feature, layer) {
-            let popupContent = "<b>Calle</b><br>";
-            
-            if (feature.properties) {
-                for (let key in feature.properties) {
-                    popupContent += key + ": " + feature.properties[key] + "<br>";
-                }
-            }
-            layer.bindPopup(popupContent);
-        }
-    });
-
-    // Agregar las capas al mapa
-    areasLayer.addTo(map);
-    callesLayer.addTo(map);
-
-    // ==== CARGAR GEOJSON DESDE GITHUB ====
-
-    // ÁREAS → archivo renombrado
-    fetch("SaniAreas.geojson")
-        .then(response => response.json())
-        .then(data => {
-            areasLayer.addData(data);
-        });
-
-    // CALLES → archivo renombrado
-    fetch("SaniCalles.geojson")
-        .then(response => response.json())
-        .then(data => {
-            callesLayer.addData(data);
-        });
-
-    // Control de capas
-    L.control.layers(null, {
-        "Áreas": areasLayer,
-        "Calles": callesLayer
-    }).addTo(map);
-
-</script>
-
-</body>
-</html>
+<div id="sidebar" class="leaflet-sidebar collapsed">
+    <div class="leaflet-sidebar-tabs">
+        <ul role="tablist">
+            <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+            <li><a href="#layers" role="tab"><i class="fa fa-layer-group"></i></a></li>
+        </ul>
+        <ul role="tablist">
+            <
